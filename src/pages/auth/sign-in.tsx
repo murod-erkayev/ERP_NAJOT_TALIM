@@ -3,6 +3,8 @@ import { Formik, Form, Field, ErrorMessage } from "formik"
 import * as Yup from "yup"
 import { authService } from "@service/auth.service"
 import loginImage from "../../assets/photo_2025-07-02_18-26-01.jpg"
+import { useNavigate } from "react-router-dom"
+import { SetItem } from "../../helper/storages"
 
 const SignInSchema = Yup.object({
   email: Yup.string()
@@ -15,20 +17,32 @@ const SignInSchema = Yup.object({
 })
 
 export const SignIn = () => {
+  const [role, setRole] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const navigate = useNavigate()
 
   const handleSubmit = async (values: { email: string; password: string }) => {
     setLoading(true)
     setError("")
-    try {
-      const res = await authService.sigIn(values)
-      return res
-    } catch (err) {
-      console.log("Email yoki Password Hato");
-    } finally {
+
+    if (!role) {
+      setError("Iltimos, rolni tanlang")
       setLoading(false)
+      return
     }
+      const res = await authService.sigIn(values, role)
+      if(res.status== 201){
+        SetItem("access_token", res.data.access_token)
+        SetItem("role", role)
+        if(role == "admin"){
+          navigate('admin/groups')
+        }else{
+          navigate(`/${role}`)
+        }
+      } 
+
+
   }
 
   return (
@@ -52,13 +66,26 @@ export const SignIn = () => {
               className="w-full mb-2 px-4 py-2 border border-gray-300 rounded bg-blue-50"
             />
             <ErrorMessage name="email" component="div" className="text-red-500 text-sm mb-2" />
-              <Field
-                name="password"
-                type="password"
-                placeholder="Parol"
-                className="w-full mb-2 px-4 py-2 border border-gray-300 rounded bg-blue-50"
-              />
+
+            <Field
+              name="password"
+              type="password"
+              placeholder="Parol"
+              className="w-full mb-2 px-4 py-2 border border-gray-300 rounded bg-blue-50"
+            />
             <ErrorMessage name="password" component="div" className="text-red-500 text-sm mb-2" />
+
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full mb-2 px-4 py-2 border border-gray-300 rounded bg-blue-50"
+            >
+              <option value="">Rolni tanlang</option>
+              <option value="admin">Admin</option>
+              <option value="teacher">Teacher</option>
+              <option value="student">Student</option>
+              <option value="lid">Lid</option>
+            </select>
 
             {error && <div className="text-red-600 text-sm mb-4">{error}</div>}
 

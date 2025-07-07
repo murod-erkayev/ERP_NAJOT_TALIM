@@ -1,4 +1,8 @@
 export class ApiUrls{
     //ADMIN AUTH
-    public static ADMIN_AUTH_LOGIN:string= "/admin_auth/logIn"
+    public static AUTH:string= "/log-in"
+    // Groups
+    public static GROUPS:string= "/group"
+    // Course
+    public static Course:string = "/courses"
 }

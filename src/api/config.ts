@@ -20,8 +20,28 @@ export function apiConfig(){
             console.log("PostRequest",error);
         }
     }
+    async function putRequest(url:string, body:Object={}){
+        try {
+            const res = await axiosInstance.patch(url, body)
+            return res
+        } catch (error:any) {
+            Notification("error", error.response?.data?.message || error.message)
+            console.log("PostRequest",error);
+        }
+    }
+    async function deleteRequest(url:string, params:Object={}){
+        try {
+            const res =await axiosInstance.delete(url, {params})
+            return res
+        } catch (error:any) {
+            Notification("error", error.response.message)
+            console.log("PostRequest",error);
+        }
+    }
     return {
         getRequest,
-        postRequest
+        postRequest,
+        putRequest,
+        deleteRequest
     }
 }
