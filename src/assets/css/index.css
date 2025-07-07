@@ -1,1 +1,32 @@
 @import "tailwindcss";
+/* Custom CSS faylga qo'shing */
+.custom-toggle-btn:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3) !important;
+  }
+  
+  .custom-menu .ant-menu-item {
+    border-radius: 8px !important;
+    margin: 4px 8px !important;
+    transition: all 0.3s ease !important;
+  }
+  
+  .custom-menu .ant-menu-item:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    transform: translateX(5px);
+  }
+  
+  .custom-menu .ant-menu-item-selected {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-radius: 8px !important;
+  }
+  
+  .custom-menu .ant-menu-item a {
+    color: white !important;
+    font-weight: 500;
+  }
+  
+  .custom-menu .ant-menu-item-icon {
+    font-size: 16px !important;
+  }

@@ -16,20 +16,22 @@ interface Props {
 export const ModalGroupForm = ({ open, onClose, onReload, editingGroup }: Props) => {
   const [form] = Form.useForm();
   const [courses, setCourses] = useState<{ value: number; label: string }[]>([]);
-
   // ✅ Kurslar ro‘yxatini olish
   useEffect(() => {
-    CourseService.getAllCourse().then((res) => {
-      const options =  res && res.data.courses.map((item: any) => ({
-        value: item.id,
-        label: item.title,
+    const fetchCourse = async ()=>{
+      const res = await CourseService.getAllCourse()
+      const option = res?.data?.courses.map((item:any)=>({
+        value:item.id,
+        label:item.title
       }));
-      setCourses(options);
-    });
-  }, []);
-
+      setCourses(option)
+}
+fetchCourse()
+  }, []);  
   // ✅ Modal ochilganda formani to‘ldirish yoki tozalash
   useEffect(() => {
+    if (!open) return; // Modal ochilmagan bo‘lsa, hech narsa qilmaymiz
+  
     if (editingGroup) {
       form.setFieldsValue({
         ...editingGroup,
@@ -37,9 +39,10 @@ export const ModalGroupForm = ({ open, onClose, onReload, editingGroup }: Props)
         end_date: dayjs(editingGroup.end_date),
       });
     } else {
-      form.resetFields(); // <<<< ✅ Yangi group qo‘shilganda inputlar tozalanadi
+      form.resetFields();
     }
-  }, [editingGroup, form]);
+  }, [open, editingGroup, form]);
+  
 
   // ✅ Forma submit bo‘lganda
   const onFinish = (values: any) => {
@@ -69,22 +72,21 @@ export const ModalGroupForm = ({ open, onClose, onReload, editingGroup }: Props)
     >
       <Form form={form} layout="vertical" onFinish={onFinish}>
         <Form.Item name="name" label="Group Name" rules={[{ required: true }]}>
-          <Input placeholder="Masalan: Frontend 01" />
+          <Input placeholder="Write Group "/>
+        </Form.Item>
+        <Form.Item name="course_id" label="Select Course" rules={[{ required: true }]}>
+          <Select options={courses} placeholder="Choose Course" />
         </Form.Item>
 
-        <Form.Item name="course_id" label="Kursni tanlang" rules={[{ required: true }]}>
-          <Select options={courses} placeholder="Kursni tanlang" />
-        </Form.Item>
-
-        <Form.Item name="start_date" label="Boshlanish sanasi" rules={[{ required: true }]}>
+        <Form.Item name="start_date" label="Start Date" rules={[{ required: true }]}>
           <DatePicker style={{ width: "100%" }} />
         </Form.Item>
 
-        <Form.Item name="end_date" label="Tugash sanasi" rules={[{ required: true }]}>
+        <Form.Item name="end_date" label="End Date" rules={[{ required: true }]}>
           <DatePicker style={{ width: "100%" }} />
         </Form.Item>
 
-        <Form.Item name="status" label="Holati" rules={[{ required: true }]}>
+        <Form.Item name="status" label="Situvate" rules={[{ required: true }]}>
           <Select
             options={[
               { value: "active", label: "Faol" },

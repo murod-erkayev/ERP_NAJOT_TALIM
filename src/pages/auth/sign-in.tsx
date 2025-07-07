@@ -25,25 +25,40 @@ export const SignIn = () => {
   const handleSubmit = async (values: { email: string; password: string }) => {
     setLoading(true)
     setError("")
-
+  
     if (!role) {
       setError("Iltimos, rolni tanlang")
       setLoading(false)
       return
     }
+  
+    try {
       const res = await authService.sigIn(values, role)
-      if(res.status== 201){
+  
+      if (res?.status === 201) {
         SetItem("access_token", res.data.access_token)
         SetItem("role", role)
-        if(role == "admin"){
-          navigate('admin/groups')
-        }else{
+  
+        if (role === "admin") {
+          navigate("/admin/groups")
+        } else {
           navigate(`/${role}`)
         }
-      } 
-
-
+      } else {
+        setError("Kirish muvaffaqiyatsiz, qayta urinib ko‘ring.")
+      }
+    } catch (error: any) {
+      const status = error?.response?.status
+      if (status === 400) {
+        setError("Email yoki parol noto‘g‘ri!")
+      } else {
+        setError("Serverda xatolik, keyinroq urinib ko‘ring.")
+      }
+    } finally {
+      setLoading(false)
+    }
   }
+  
 
   return (
     <div className="flex min-h-screen">
