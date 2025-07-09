@@ -1,23 +1,23 @@
 import {Route, RouterProvider, createBrowserRouter, createRoutesFromElements } from 'react-router-dom';
 import App from '../App';
-import { SignUp,SignIn, Admin, Student, Teacher, NotFound, Posts, Products } from '../pages';
+import { SignUp,SignIn, Admin, StudentLayout, Teacher, NotFound, Posts, Products, LoginProtect, LayoutProtect } from '../pages';
 import { Groups } from '../pages/groups/groups';
 const Router = () => {
     const router = createBrowserRouter(
         createRoutesFromElements(
             <Route path='/' element = {<App/>}>   
                 {/* SiginIN and SingUp Routes  */}
-                <Route index element={<SignIn/>}/>
+                <Route index element={<LoginProtect><SignIn/></LoginProtect>}/>
                 <Route path='sign-up' element={<SignUp/>}/>
                 {/* Admin Layout */}
-                <Route path='admin' element={<Admin/>}>
-                    <Route path='groups' element={<Groups/>}/>,
-                    <Route path='students' element={<Student/>}/>,
+                <Route path='admin' element={<LayoutProtect><Admin/></LayoutProtect>}>
+                    <Route index element={<Groups/>}/>,
+                    <Route path='students' element={<StudentLayout/>}/>,
                     <Route path='products' element={<Products/>}/>,
                     <Route path='posts' element={<Posts/>}></Route>
                 </Route>
                 {/* Student Layout */}
-                <Route path='student' element={<Student/>}>
+                <Route path='student' element={<StudentLayout/>}>
                 
                 </Route>
 

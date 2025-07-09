@@ -21,9 +21,9 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
 
   const items: MenuItem[] = [
     {
-      key: '/admin/groups',
+      key: '/admin/',
       icon: <TeamOutlined />,
-      label: <Link to="/admin/groups">Groups</Link>,
+      label: <Link to="/admin/">Groups</Link>,
     },
     {
       key: '/admin/students',

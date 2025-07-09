@@ -5,4 +5,6 @@ export class ApiUrls{
     public static GROUPS:string= "/group"
     // Course
     public static Course:string = "/courses"
+    //Sutdents
+    public static STUDENTS:string = "/student"
 }

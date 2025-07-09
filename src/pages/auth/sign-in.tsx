@@ -1,11 +1,10 @@
 import { useState } from "react"
 import { Formik, Form, Field, ErrorMessage } from "formik"
 import * as Yup from "yup"
-import { authService } from "@service/auth.service"
 import loginImage from "../../assets/photo_2025-07-02_18-26-01.jpg"
 import { useNavigate } from "react-router-dom"
 import { SetItem } from "../../helper/storages"
-
+import { useAuth } from "../../hooks"
 const SignInSchema = Yup.object({
   email: Yup.string()
     .email("Emailni to‘g‘ri formatda kiriting")
@@ -21,42 +20,27 @@ export const SignIn = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const navigate = useNavigate()
-
+const {mutate, isPending} = useAuth()
   const handleSubmit = async (values: { email: string; password: string }) => {
     setLoading(true)
     setError("")
-  
     if (!role) {
       setError("Iltimos, rolni tanlang")
       setLoading(false)
       return
     }
-  
-    try {
-      const res = await authService.sigIn(values, role)
-  
-      if (res?.status === 201) {
-        SetItem("access_token", res.data.access_token)
-        SetItem("role", role)
-  
-        if (role === "admin") {
-          navigate("/admin/groups")
-        } else {
-          navigate(`/${role}`)
+    mutate(
+      {data:values, role},
+      {
+        onSuccess:(res:any)=>{
+          if (res?.status === 201) {
+            SetItem("access_token", res.data.access_token)
+            SetItem("role", role)
+              navigate(`/${role}`)
+          }
         }
-      } else {
-        setError("Kirish muvaffaqiyatsiz, qayta urinib ko‘ring.")
       }
-    } catch (error: any) {
-      const status = error?.response?.status
-      if (status === 400) {
-        setError("Email yoki parol noto‘g‘ri!")
-      } else {
-        setError("Serverda xatolik, keyinroq urinib ko‘ring.")
-      }
-    } finally {
-      setLoading(false)
-    }
+    )
   }
   
 
@@ -106,7 +90,7 @@ export const SignIn = () => {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={isPending}
               className={`w-full py-2 rounded text-white ${
                 loading ? "bg-gray-400" : "bg-[#BB8B54] hover:bg-[#a37444]"
               }`}

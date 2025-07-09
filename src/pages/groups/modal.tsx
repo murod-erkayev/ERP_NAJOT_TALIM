@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Modal, Form, Input, Select, DatePicker } from "antd";
 import dayjs from "dayjs";
-
-import { GroupService } from "../../service/groups.service";
-import { CourseService } from "../../service/course.service"; // Kurslar uchun servis
 import type { GroupTypes } from "../../types/group";
+import { useCourse, useGroup } from "../../hooks";
 
 interface Props {
   open: boolean;
@@ -15,23 +13,13 @@ interface Props {
 
 export const ModalGroupForm = ({ open, onClose, onReload, editingGroup }: Props) => {
   const [form] = Form.useForm();
-  const [courses, setCourses] = useState<{ value: number; label: string }[]>([]);
-  // ✅ Kurslar ro‘yxatini olish
+  const { useGroupCreate, useGroupUpdate } = useGroup();
+  const createMutation = useGroupCreate();
+  const updateMutation = useGroupUpdate();
+  const { data: courseOptions, isLoading: loadingCourses } = useCourse();
+  //Data 
   useEffect(() => {
-    const fetchCourse = async ()=>{
-      const res = await CourseService.getAllCourse()
-      const option = res?.data?.courses.map((item:any)=>({
-        value:item.id,
-        label:item.title
-      }));
-      setCourses(option)
-}
-fetchCourse()
-  }, []);  
-  // ✅ Modal ochilganda formani to‘ldirish yoki tozalash
-  useEffect(() => {
-    if (!open) return; // Modal ochilmagan bo‘lsa, hech narsa qilmaymiz
-  
+    if (!open) return; 
     if (editingGroup) {
       form.setFieldsValue({
         ...editingGroup,
@@ -42,9 +30,8 @@ fetchCourse()
       form.resetFields();
     }
   }, [open, editingGroup, form]);
-  
 
-  // ✅ Forma submit bo‘lganda
+
   const onFinish = (values: any) => {
     const formattedValues = {
       ...values,
@@ -52,16 +39,29 @@ fetchCourse()
       end_date: values.end_date.format("YYYY-MM-DD"),
     };
 
-    const request = editingGroup
-      ? GroupService.updateGroup(editingGroup.id, formattedValues)
-      : GroupService.createGroup(formattedValues);
+    
+    if (editingGroup) {
+      updateMutation.mutate(
+        { id: editingGroup.id, data: formattedValues },
+        {
+          onSuccess: () => {
+            form.resetFields();
+            onClose();
+            onReload();
+          },
+        }
+      );
+    } else {
+      createMutation.mutate(formattedValues, {
+        onSuccess: () => {
+          form.resetFields();
+          onClose();
+          onReload();
+        },
+      });
+    }
+  }
 
-    request?.then(() => {
-      form.resetFields();  // <<<< ✅ Ma’lumot saqlangandan keyin inputlar tozalanadi
-      onClose();
-      onReload();
-    });
-  };
 
   return (
     <Modal
@@ -75,7 +75,7 @@ fetchCourse()
           <Input placeholder="Write Group "/>
         </Form.Item>
         <Form.Item name="course_id" label="Select Course" rules={[{ required: true }]}>
-          <Select options={courses} placeholder="Choose Course" />
+          <Select options={courseOptions} placeholder="Choose Course"  loading={loadingCourses}/>
         </Form.Item>
 
         <Form.Item name="start_date" label="Start Date" rules={[{ required: true }]}>
@@ -99,5 +99,4 @@ fetchCourse()
     </Modal>
   );
 };
-
 export default ModalGroupForm;

@@ -1,5 +1,6 @@
 import React from 'react';
 import { LogOut, User, Menu, X } from 'lucide-react';
+import { GetItem } from '../helper/storages';
 
 type HeaderProps = {
   title?: string;
@@ -16,19 +17,15 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const handleLogout = () => {
     // Logout logic
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userInfo');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('role');
     // Redirect to login page
     window.location.href = '/';
   };
-
   const handleSignIn = () => {
     // Redirect to sign in page
     window.location.href = '/';
   };
-
-  const isAuthenticated = localStorage.getItem('authToken'); // Check if user is logged in
-
   return (
     <header className="bg-slate-800 text-white p-4 shadow-lg">
       <div className="flex items-center justify-between">
@@ -56,7 +53,7 @@ const Header: React.FC<HeaderProps> = ({
         
         {showAuthButtons && (
           <div className="flex items-center space-x-3">
-            {isAuthenticated ? (
+            {GetItem('access_token') ? (
               <>
                 <div className="flex items-center space-x-2 text-sm">
                   <User size={16} />
@@ -76,7 +73,7 @@ const Header: React.FC<HeaderProps> = ({
                 className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-md text-sm transition-colors"
               >
                 <User size={16} />
-                <span>Sign In</span>
+                <span>Sign Out</span>
               </button>
             )}
           </div>

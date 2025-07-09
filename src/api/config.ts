@@ -10,9 +10,9 @@ export function apiConfig() {
       const msg = error?.response?.data?.message || error.message || "Noma'lum xatolik";
       Notification("error", "GET so'rovida xatolik", msg);
       console.log("GetRequest", error);
+      throw error; // ✅ Shart!
     }
   }
-
   async function postRequest(url: string, body: Object = {}) {
     try {
       const res = await axiosInstance.post(url, body);
