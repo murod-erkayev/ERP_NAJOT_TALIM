@@ -11,15 +11,34 @@ interface Props {
   editingGroup: GroupTypes | null;
 }
 
-export const ModalGroupForm = ({ open, onClose, onReload, editingGroup }: Props) => {
+export const ModalGroupForm = ({
+  open,
+  onClose,
+  onReload,
+  editingGroup,
+}: Props) => {
   const [form] = Form.useForm();
   const { useGroupCreate, useGroupUpdate } = useGroup();
   const createMutation = useGroupCreate();
   const updateMutation = useGroupUpdate();
-  const { data: courseOptions, isLoading: loadingCourses } = useCourse();
-  //Data 
+
+  // useCourse dan data oling va manual options yarating
+  const { data: courses, isLoading: loadingCourses } = useCourse();
+
+  // Manual options yaratish
+  const courseOptions =
+    courses?.map((course: any) => ({
+      value: course.id,
+      label: course.title,
+    })) || [];
+
+  // Debug uchun
+  console.log("courses:", courses);
+  console.log("courseOptions:", courseOptions);
+
+  //Data
   useEffect(() => {
-    if (!open) return; 
+    if (!open) return;
     if (editingGroup) {
       form.setFieldsValue({
         ...editingGroup,
@@ -31,7 +50,6 @@ export const ModalGroupForm = ({ open, onClose, onReload, editingGroup }: Props)
     }
   }, [open, editingGroup, form]);
 
-
   const onFinish = (values: any) => {
     const formattedValues = {
       ...values,
@@ -39,7 +57,6 @@ export const ModalGroupForm = ({ open, onClose, onReload, editingGroup }: Props)
       end_date: values.end_date.format("YYYY-MM-DD"),
     };
 
-    
     if (editingGroup) {
       updateMutation.mutate(
         { id: editingGroup.id, data: formattedValues },
@@ -60,29 +77,49 @@ export const ModalGroupForm = ({ open, onClose, onReload, editingGroup }: Props)
         },
       });
     }
-  }
-
+  };
 
   return (
     <Modal
       title={editingGroup ? "Edit Group" : "Add New Group"}
       open={open}
       onCancel={onClose}
-      onOk={() => form.submit()}
-    >
+      onOk={() => form.submit()}>
       <Form form={form} layout="vertical" onFinish={onFinish}>
         <Form.Item name="name" label="Group Name" rules={[{ required: true }]}>
-          <Input placeholder="Write Group "/>
-        </Form.Item>
-        <Form.Item name="course_id" label="Select Course" rules={[{ required: true }]}>
-          <Select options={courseOptions} placeholder="Choose Course"  loading={loadingCourses}/>
+          <Input placeholder="Write Group " />
         </Form.Item>
 
-        <Form.Item name="start_date" label="Start Date" rules={[{ required: true }]}>
+        <Form.Item
+          name="course_id"
+          label="Select Course"
+          rules={[{ required: true }]}>
+          <Select
+  options={courseOptions || []}
+  placeholder="Choose Course"
+  loading={loadingCourses}
+  showSearch
+  filterOption={(input, option) => {
+    const label = option?.label;
+    if (typeof label === 'string') {
+      return label.toLowerCase().includes(input.toLowerCase());
+    }
+    return false;
+  }}
+/>
+        </Form.Item>
+
+        <Form.Item
+          name="start_date"
+          label="Start Date"
+          rules={[{ required: true }]}>
           <DatePicker style={{ width: "100%" }} />
         </Form.Item>
 
-        <Form.Item name="end_date" label="End Date" rules={[{ required: true }]}>
+        <Form.Item
+          name="end_date"
+          label="End Date"
+          rules={[{ required: true }]}>
           <DatePicker style={{ width: "100%" }} />
         </Form.Item>
 
@@ -99,4 +136,5 @@ export const ModalGroupForm = ({ open, onClose, onReload, editingGroup }: Props)
     </Modal>
   );
 };
+
 export default ModalGroupForm;

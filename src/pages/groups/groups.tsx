@@ -163,6 +163,7 @@ export const Groups = () => {
 
   return (
     <div>
+      <h1 className="text-xl p-2 items-center justify-center">Groups</h1>
       {/* Filter kartasi */}
       <Card style={{ marginBottom: 16 }}>
         <Row gutter={[16, 16]} align="middle">

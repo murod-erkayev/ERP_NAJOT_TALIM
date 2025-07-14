@@ -18,7 +18,7 @@ export const ModalStudentForm = ({ open, onClose, onReload, editingStudent }: Pr
   const updateMutation = useStudentUpdate();
 
 
-  
+
   useEffect(() => {
     if (!open) return;
     if (editingStudent) {
@@ -69,7 +69,6 @@ export const ModalStudentForm = ({ open, onClose, onReload, editingStudent }: Pr
       });
     }
   };
-
   return (
     <Modal
       title={editingStudent ? "Talabani tahrirlash" : "Yangi talaba qo'shish"}
