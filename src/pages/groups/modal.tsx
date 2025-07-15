@@ -1,135 +1,250 @@
-import { useEffect } from "react";
-import { Modal, Form, Input, Select, DatePicker } from "antd";
-import dayjs from "dayjs";
+// src/pages/groups/modal.tsx
+
+import { Form, Input, Modal, Button, Select, DatePicker, message } from "antd";
+import { useForm, Controller } from "react-hook-form";
 import type { GroupTypes } from "../../types/group";
-import { useCourse, useGroup } from "../../hooks";
+import { useGroup } from "../../hooks/useGroup";
+import React from "react";
+import dayjs, { type Dayjs } from "dayjs";
+
+// Form data type
+interface FormData {
+  name: string;
+  course_id: string;
+  start_date: Dayjs | null;
+  end_date: Dayjs | null;
+  status: string;
+}
+
+// Create type
+type CreateGroupData = Omit<GroupTypes, "id" | "teacherId">;
 
 interface Props {
   open: boolean;
-  onClose: () => void;
-  onReload: () => void;
-  editingGroup: GroupTypes | null;
+  toggle: () => void;
+  update: GroupTypes | null;
+  mode: "create" | "update";
+  courseMap: Record<number, string>;
 }
 
-export const ModalGroupForm = ({
-  open,
-  onClose,
-  onReload,
-  editingGroup,
-}: Props) => {
-  const [form] = Form.useForm();
-  const { useGroupCreate, useGroupUpdate } = useGroup();
+const ModalGroupForm = ({ open, toggle, update, mode, courseMap }: Props) => {
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormData>({
+    defaultValues: {
+      name: "",
+      course_id: "",
+      start_date: null,
+      end_date: null,
+      status: "",
+    },
+  });
+
+  // Hooks
+  const { useGroupCreate, useGroupUpdate } = useGroup({ page: 1, limit: 10 });
   const createMutation = useGroupCreate();
   const updateMutation = useGroupUpdate();
 
-  // useCourse dan data oling va manual options yarating
-  const { data: courses, isLoading: loadingCourses } = useCourse();
+  // Course options
+  const courseOptions = Object.entries(courseMap).map(([id, title]) => ({
+    value: Number(id),
+    label: title,
+  }));
 
-  // Manual options yaratish
-  const courseOptions =
-    courses?.map((course: any) => ({
-      value: course.id,
-      label: course.title,
-    })) || [];
-
-  // Debug uchun
-  console.log("courses:", courses);
-  console.log("courseOptions:", courseOptions);
-
-  //Data
-  useEffect(() => {
-    if (!open) return;
-    if (editingGroup) {
-      form.setFieldsValue({
-        ...editingGroup,
-        start_date: dayjs(editingGroup.start_date),
-        end_date: dayjs(editingGroup.end_date),
+  // Fill form when updating
+  React.useEffect(() => {
+    if (mode === "update" && update) {
+      reset({
+        name: update.name || "",
+        course_id: update.course_id?.toString() || "",
+        start_date: update.start_date ? dayjs(update.start_date) : null,
+        end_date: update.end_date ? dayjs(update.end_date) : null,
+        status: update.status || "",
       });
     } else {
-      form.resetFields();
+      reset({
+        name: "",
+        course_id: "",
+        start_date: null,
+        end_date: null,
+        status: "",
+      });
     }
-  }, [open, editingGroup, form]);
+  }, [mode, update, reset]);
 
-  const onFinish = (values: any) => {
-    const formattedValues = {
-      ...values,
-      start_date: values.start_date.format("YYYY-MM-DD"),
-      end_date: values.end_date.format("YYYY-MM-DD"),
+  const onSubmit = (data: FormData) => {
+    const formattedData: CreateGroupData = {
+      name: data.name,
+      course_id: Number(data.course_id),
+      start_date: data.start_date ? data.start_date.format("YYYY-MM-DD") : "",
+      end_date: data.end_date ? data.end_date.format("YYYY-MM-DD") : "",
+      status: data.status,
     };
 
-    if (editingGroup) {
+    if (mode === "update" && update) {
       updateMutation.mutate(
-        { id: editingGroup.id, data: formattedValues },
+        { id: update.id, data: formattedData as any },
         {
           onSuccess: () => {
-            form.resetFields();
-            onClose();
-            onReload();
+            message.success("Group updated successfully");
+            reset();
+            toggle();
+          },
+          onError: () => {
+            message.error("Failed to update group");
           },
         }
       );
     } else {
-      createMutation.mutate(formattedValues, {
+      createMutation.mutate(formattedData as any, {
         onSuccess: () => {
-          form.resetFields();
-          onClose();
-          onReload();
+          message.success("Group created successfully");
+          reset();
+          toggle();
+        },
+        onError: () => {
+          message.error("Failed to create group");
         },
       });
     }
   };
 
+  const handleCancel = () => {
+    reset();
+    toggle();
+  };
+
+  const isLoading = createMutation.isPending || updateMutation.isPending;
+
   return (
     <Modal
-      title={editingGroup ? "Edit Group" : "Add New Group"}
+      title={mode === "update" ? "Edit Group" : "Add New Group"}
+      centered
       open={open}
-      onCancel={onClose}
-      onOk={() => form.submit()}>
-      <Form form={form} layout="vertical" onFinish={onFinish}>
-        <Form.Item name="name" label="Group Name" rules={[{ required: true }]}>
-          <Input placeholder="Write Group " />
+      onCancel={handleCancel}
+      width={700}
+      destroyOnClose
+      footer={[
+        <Button key="cancel" onClick={handleCancel} disabled={isLoading}>
+          Cancel
+        </Button>,
+        <Button
+          key="submit"
+          type="primary"
+          loading={isLoading}
+          onClick={handleSubmit(onSubmit)}>
+          {mode === "update" ? "Update" : "Create"}
+        </Button>,
+      ]}>
+      <Form layout="vertical" autoComplete="off">
+        <Form.Item
+          label="Group Name"
+          validateStatus={errors.name ? "error" : ""}
+          help={errors.name?.message}>
+          <Controller
+            name="name"
+            control={control}
+            rules={{ required: "Group name is required" }}
+            render={({ field }) => (
+              <Input
+                {...field}
+                placeholder="Enter group name"
+                disabled={isLoading}
+              />
+            )}
+          />
         </Form.Item>
 
         <Form.Item
-          name="course_id"
-          label="Select Course"
-          rules={[{ required: true }]}>
-          <Select
-  options={courseOptions || []}
-  placeholder="Choose Course"
-  loading={loadingCourses}
-  showSearch
-  filterOption={(input, option) => {
-    const label = option?.label;
-    if (typeof label === 'string') {
-      return label.toLowerCase().includes(input.toLowerCase());
-    }
-    return false;
-  }}
-/>
+          label="Course"
+          validateStatus={errors.course_id ? "error" : ""}
+          help={errors.course_id?.message}>
+          <Controller
+            name="course_id"
+            control={control}
+            rules={{ required: "Course selection is required" }}
+            render={({ field }) => (
+              <Select
+                {...field}
+                placeholder="Select course"
+                disabled={isLoading}
+                showSearch
+                filterOption={(input, option) =>
+                  (option?.label ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                options={courseOptions}
+              />
+            )}
+          />
         </Form.Item>
 
         <Form.Item
-          name="start_date"
           label="Start Date"
-          rules={[{ required: true }]}>
-          <DatePicker style={{ width: "100%" }} />
+          validateStatus={errors.start_date ? "error" : ""}
+          help={errors.start_date?.message}>
+          <Controller
+            name="start_date"
+            control={control}
+            rules={{ required: "Start date is required" }}
+            render={({ field }) => (
+              <DatePicker
+                {...field}
+                style={{ width: "100%" }}
+                placeholder="Select start date"
+                disabled={isLoading}
+                format="YYYY-MM-DD"
+              />
+            )}
+          />
         </Form.Item>
 
         <Form.Item
-          name="end_date"
           label="End Date"
-          rules={[{ required: true }]}>
-          <DatePicker style={{ width: "100%" }} />
+          validateStatus={errors.end_date ? "error" : ""}
+          help={errors.end_date?.message}>
+          <Controller
+            name="end_date"
+            control={control}
+            rules={{ required: "End date is required" }}
+            render={({ field }) => (
+              <DatePicker
+                {...field}
+                style={{ width: "100%" }}
+                placeholder="Select end date"
+                disabled={isLoading}
+                format="YYYY-MM-DD"
+              />
+            )}
+          />
         </Form.Item>
 
-        <Form.Item name="status" label="Situvate" rules={[{ required: true }]}>
-          <Select
-            options={[
-              { value: "active", label: "Faol" },
-              { value: "inactive", label: "Nofaol" },
-            ]}
-            placeholder="Holatni tanlang"
+        <Form.Item
+          label="Status"
+          validateStatus={errors.status ? "error" : ""}
+          help={errors.status?.message}>
+          <Controller
+            name="status"
+            control={control}
+            rules={{ required: "Status selection is required" }}
+            render={({ field }) => (
+              <Select
+                {...field}
+                placeholder="Select status"
+                disabled={isLoading}
+                options={[
+                  { value: "new", label: "New" },
+                  { value: "active", label: "Active" },
+                  { value: "completed", label: "Completed" },
+                  { value: "cancelled", label: "Cancelled" },
+                  { value: "pending", label: "Pending" },
+                ]}
+              />
+            )}
           />
         </Form.Item>
       </Form>

@@ -2,6 +2,7 @@ import { Modal, Form, Input, Select, message } from "antd";
 import { useEffect } from "react";
 import type { TeacherTypes } from "../../types/teacher";
 import { useBranch } from "../../hooks"; // Branch hook'ini import qiling
+import { MaskedInput } from "antd-mask-input";
 
 interface TeacherModalProps {
   open: boolean;
@@ -200,7 +201,10 @@ export const TeacherModal: React.FC<TeacherModalProps> = ({
                 "Telefon raqami kamida 9 ta raqamdan iborat bo'lishi kerak!",
             },
           ]}>
-          <Input placeholder="+998 90 123 45 67" maxLength={20} />
+          <MaskedInput
+            mask="+998 00 000 00 00"
+            placeholder="Enter phone number"
+          />
         </Form.Item>
 
         <Form.Item

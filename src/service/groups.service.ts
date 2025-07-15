@@ -2,10 +2,10 @@
 import { apiConfig} from "@api/config";
 import { ApiUrls } from "../api/api-urls";
 import type { GroupTypes } from "../types/group";
-
+import type { ParamsType } from "../types";
 export const GroupService = {
-  fetchGroups() {
-    return apiConfig().getRequest(ApiUrls.GROUPS);
+  fetchGroups(params:ParamsType) {
+    return apiConfig().getRequest(ApiUrls.GROUPS, params);
   },
 
   createGroup(model: GroupTypes) {

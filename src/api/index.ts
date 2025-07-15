@@ -1,39 +1,26 @@
 import axios from "axios";
-
+import { ClearItem, GetItem } from "../helper/storages";
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,
 });
 
 axiosInstance.interceptors.request.use((config) => {
-  const access_token = localStorage.getItem("access_token");
+  const access_token = GetItem("access_token");
   if (access_token) {
     config.headers["Authorization"] = `Bearer ${access_token}`;
   }
   return config;
 });
 
-// Token mavjudligini tekshirish
-const checkTokenValidity = () => {
-  const token = localStorage.getItem("access_token");
-  if (!token) {
-    window.location.href = "/login";
-    return false;
-  }
-
-  // Token formatini tekshirish (ixtiyoriy)
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    if (payload.exp * 1000 < Date.now()) {
-      localStorage.removeItem("access_token");
-      window.location.href = "/login";
-      return false;
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response && error.response.status == 401) {
+      window.location.href = "/";
+      ClearItem();
     }
-  } catch (e) {
-    localStorage.removeItem("access_token");
-    window.location.href = "/login";
-    return false;
+    return Promise.reject(error);
   }
+);
 
-  return true;
-};
 export default axiosInstance;

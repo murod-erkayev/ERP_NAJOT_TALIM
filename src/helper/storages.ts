@@ -8,3 +8,8 @@ export function removeItem(key:string){
     return localStorage.removeItem(key)
 }
 
+export function ClearItem() {
+  return localStorage.clear()
+}
+
+

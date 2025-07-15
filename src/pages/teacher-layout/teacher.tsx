@@ -155,13 +155,7 @@ export const Teachers = () => {
           );
           setModalOpen(false);
           setSelectedTeacher(null);
-        },
-        onError: (error) => {
-          //   console.log("❌ UPDATE ERROR:", error);
-          //   console.log("❌ ERROR RESPONSE:", error.response);
-          //   console.log("❌ ERROR DATA:", error.response?.data);
-          //   message.error("O'qituvchini tahrirlashda xatolik yuz berdi");
-        },
+        }
       });
     } else {
       // Yangi o'qituvchi yaratish
@@ -294,7 +288,6 @@ export const Teachers = () => {
 
   // Loading va error holatlari
   const isLoading = !teacherData;
-  const error = null;
 
   if (isLoading) {
     return (

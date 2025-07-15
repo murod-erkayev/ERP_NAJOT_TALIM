@@ -1,5 +1,15 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Space, Popconfirm, Input, Select, Row, Col, Card } from "antd";
+import {
+  Table,
+  Button,
+  Space,
+  Popconfirm,
+  Input,
+  Select,
+  Row,
+  Col,
+  Card,
+} from "antd";
 import { SearchOutlined, ClearOutlined } from "@ant-design/icons";
 import type { StudentTypes } from "../../types/student";
 import { ModalStudentForm } from "../../pages/student-layout/modal";
@@ -12,18 +22,25 @@ export const Students = () => {
   const [students, setStudents] = useState<StudentTypes[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<StudentTypes[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingStudent, setEditingStudent] = useState<StudentTypes | null>(null);
+  const [editingStudent, setEditingStudent] = useState<StudentTypes | null>(
+    null
+  );
 
-  // Filter state-lari
+  // Filter states
   const [searchText, setSearchText] = useState("");
   const [selectedGender, setSelectedGender] = useState<string | null>(null);
   const [selectedActive, setSelectedActive] = useState<boolean | null>(null);
 
   // Hooks
-  const { data: studentData, isLoading, error, useStudentDelete } = useStudent();
+  const {
+    data: studentData,
+    isLoading,
+    error,
+    useStudentDelete,
+  } = useStudent();
   const deleteMutation = useStudentDelete();
 
-  // useEffect orqali data kelyapti
+  // Load data via useEffect
   useEffect(() => {
     if (studentData?.data?.students) {
       setStudents(studentData.data.students);
@@ -32,7 +49,7 @@ export const Students = () => {
     }
   }, [studentData]);
 
-  // Filtrlash
+  // Filtering
   useEffect(() => {
     let filtered = [...students];
 
@@ -45,11 +62,13 @@ export const Students = () => {
     }
 
     if (selectedGender) {
-      filtered = filtered.filter((student) => student.gender === selectedGender);
+      filtered = filtered.filter(
+        (student) => student.gender === selectedGender
+      );
     }
 
     if (selectedActive !== null) {
-      filtered = filtered.filter((student) => student.is_active );
+      filtered = filtered.filter((student) => student.is_active);
     }
 
     setFilteredStudents(filtered);
@@ -61,7 +80,7 @@ export const Students = () => {
       { id: student.id },
       {
         onSuccess: () => {
-          console.log("Talaba o‘chirildi:", student.id);
+          console.log("Student deleted:", student.id);
           setStudents((prev) => prev.filter((s) => s.id !== student.id));
         },
       }
@@ -85,61 +104,62 @@ export const Students = () => {
     setSelectedActive(null);
   };
 
-  // Jadval ustunlari
+  // Table columns
   const columns = [
     {
       title: "ID",
       render: (_: any, __: any, index: number) => index + 1,
     },
     {
-      title: "Ism",
+      title: "First Name",
       dataIndex: "first_name",
-      sorter: (a: StudentTypes, b: StudentTypes) => a.first_name.localeCompare(b.first_name),
+      sorter: (a: StudentTypes, b: StudentTypes) =>
+        a.first_name.localeCompare(b.first_name),
     },
     {
-      title: "Familiya",
+      title: "Last Name",
       dataIndex: "last_name",
-      sorter: (a: StudentTypes, b: StudentTypes) => a.last_name.localeCompare(b.last_name),
+      sorter: (a: StudentTypes, b: StudentTypes) =>
+        a.last_name.localeCompare(b.last_name),
     },
     {
       title: "Email",
       dataIndex: "email",
     },
     {
-      title: "Telefon",
+      title: "Phone",
       dataIndex: "phone",
     },
     {
-      title: "Jins",
+      title: "Gender",
       dataIndex: "gender",
-      render: (gender: string) => (gender === "male" ? "Erkak" : "Ayol"),
+      render: (gender: string) => (gender === "male" ? "Male" : "Female"),
     },
     {
-      title: "Tug‘ilgan sana",
+      title: "Date of Birth",
       dataIndex: "date_of_birth",
-      render: (date: string) => new Date(date).toLocaleDateString("uz-UZ"),
+      render: (date: string) => new Date(date).toLocaleDateString("en-US"),
     },
     {
-      title: "Holati",
+      title: "Status",
       dataIndex: "is_active",
       render: (active: boolean) =>
         active ? (
-          <span style={{ color: "green", fontWeight: "bold" }}>Faol</span>
+          <span style={{ color: "green", fontWeight: "bold" }}>Active</span>
         ) : (
-          <span style={{ color: "red", fontWeight: "bold" }}>Faol emas</span>
+          <span style={{ color: "red", fontWeight: "bold" }}>Inactive</span>
         ),
     },
     {
-      title: "Amallar",
+      title: "Actions",
       render: (_: any, student: StudentTypes) => (
         <Space>
           <Button type="link" onClick={() => handleUpdate(student)}>
             ✏️
           </Button>
           <Popconfirm
-            title="O‘chirishga ishonchingiz komilmi?"
-            onConfirm={() => handleDelete(student)}
-          >
+            title="Are you sure you want to delete this student?"
+            onConfirm={() => handleDelete(student)}>
             <Button type="link" danger>
               🗑
             </Button>
@@ -149,18 +169,18 @@ export const Students = () => {
     },
   ];
 
-  // Xato yoki yuklanish holati
-  if (error) return <div>Xato yuz berdi: {error.message}</div>;
-  if (isLoading) return <div>Yuklanmoqda...</div>;
+  // Error or loading states
+  if (error) return <div>Error occurred: {error.message}</div>;
+  if (isLoading) return <div>Loading...</div>;
 
   return (
     <div>
-      {/* Filtrlar */}
+      {/* Filters */}
       <Card style={{ marginBottom: 16 }}>
         <Row gutter={[16, 16]} align="middle">
           <Col xs={24} sm={12} md={6}>
             <Search
-              placeholder="Ism yoki familiya..."
+              placeholder="Search by name..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               prefix={<SearchOutlined />}
@@ -170,27 +190,25 @@ export const Students = () => {
 
           <Col xs={24} sm={12} md={5}>
             <Select
-              placeholder="Jinsni tanlang"
+              placeholder="Choose Gender"
               style={{ width: "100%" }}
               value={selectedGender}
               onChange={setSelectedGender}
-              allowClear
-            >
-              <Option value="male">Erkak</Option>
-              <Option value="female">Ayol</Option>
+              allowClear>
+              <Option value="male">Male</Option>
+              <Option value="female">Female</Option>
             </Select>
           </Col>
 
           <Col xs={24} sm={12} md={5}>
             <Select
-              placeholder="Holatini tanlang"
+              placeholder="Select Status"
               style={{ width: "100%" }}
               value={selectedActive}
               onChange={setSelectedActive}
-              allowClear
-            >
-              <Option value={true}>Faol</Option>
-              <Option value={false}>Faol emas</Option>
+              allowClear>
+              <Option value={true}>Active</Option>
+              <Option value={false}>Inactive</Option>
             </Select>
           </Col>
 
@@ -199,19 +217,20 @@ export const Students = () => {
               <Button
                 icon={<ClearOutlined />}
                 onClick={clearAllFilters}
-                disabled={!searchText && !selectedGender && selectedActive === null}
-              >
-                Tozalash
+                disabled={
+                  !searchText && !selectedGender && selectedActive === null
+                }>
+                Clear Filters
               </Button>
               <Button type="primary" onClick={handleCreate}>
-                + Talaba qo‘shish
+                + Add Student
               </Button>
             </Space>
           </Col>
         </Row>
       </Card>
 
-      {/* Jadval */}
+      {/* Table */}
       <Table
         dataSource={filteredStudents}
         columns={columns}
@@ -221,14 +240,14 @@ export const Students = () => {
           showSizeChanger: true,
           showQuickJumper: true,
           showTotal: (total, range) =>
-            `${range[0]}-${range[1]} / ${total} ta talaba`,
+            `${range[0]}-${range[1]} of ${total} students`,
           position: ["bottomCenter"],
         }}
         locale={{
           emptyText:
             filteredStudents.length === 0 && students.length > 0
-              ? "Hech qanday talaba topilmadi"
-              : "Talabalar mavjud emas",
+              ? "No students found"
+              : "No students available",
         }}
       />
 

@@ -1,6 +1,6 @@
 export interface StudentTypes {
+    id:number;
     is_active: boolean;
-    id:number,
     first_name:string,
     last_name:string,
     email:string,

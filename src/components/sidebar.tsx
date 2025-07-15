@@ -1,16 +1,17 @@
 // components/admin/Sidebar.tsx
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu } from 'antd';
-import { 
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Menu } from "antd";
+import {
   TeamOutlined,
   UserOutlined,
-  FileTextOutlined,
-  ShopOutlined
-} from '@ant-design/icons';
-import type { MenuProps } from 'antd';
+  BookOutlined,
+  ShopOutlined,
+  UserSwitchOutlined,
+} from "@ant-design/icons";
+import type { MenuProps } from "antd";
 
-type MenuItem = Required<MenuProps>['items'][number];
+type MenuItem = Required<MenuProps>["items"][number];
 
 interface SidebarProps {
   collapsed: boolean;
@@ -32,7 +33,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
     },
     {
       key: "/admin/courses",
-      icon: <FileTextOutlined />,
+      icon: <BookOutlined />,
       label: <Link to="/admin/courses">Courses</Link>,
     },
     {
@@ -42,14 +43,13 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
     },
     {
       key: "/admin/teachers",
-      icon: <ShopOutlined />,
+      icon: <UserSwitchOutlined />,
       label: <Link to="/admin/teachers">Teachers</Link>,
     },
-
   ];
 
   return (
-    <div style={{ width: collapsed ? 80 : 256, transition: 'width 0.3s ease' }}>
+    <div style={{ width: collapsed ? 80 : 250, transition: "width 0.1s ease" }}>
       <Menu
         selectedKeys={[location.pathname]}
         mode="inline"
@@ -57,10 +57,10 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
         inlineCollapsed={collapsed}
         items={items}
         className="custom-menu"
-        style={{ 
-          height: '100vh', 
+        style={{
+          height: "100vh",
           borderRight: 0,
-          background: 'linear-gradient(180deg, #001529 0%, #002140 100%)'
+          background: "linear-gradient(180deg, #001529 0%, #002140 100%)",
         }}
       />
     </div>

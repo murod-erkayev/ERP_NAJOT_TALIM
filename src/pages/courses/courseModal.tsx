@@ -13,7 +13,7 @@ interface CourseModalProps {
 const { TextArea } = Input;
 const { Option } = Select;
 
-// Kurs nomlari options
+// Course name options
 const courseNameOptions = [
   { value: "Frontend Development", label: "Frontend Development" },
   { value: "Backend Development", label: "Backend Development" },
@@ -27,40 +27,40 @@ const courseNameOptions = [
   { value: "Data Science", label: "Data Science" },
 ];
 
-// Narx options
+// Price options
 const priceOptions = [
-  { value: 0, label: "Bepul" },
-  { value: 300000, label: "300,000 so'm" },
-  { value: 500000, label: "500,000 so'm" },
-  { value: 800000, label: "800,000 so'm" },
-  { value: 1000000, label: "1,000,000 so'm" },
-  { value: 1500000, label: "1,500,000 so'm" },
-  { value: 2000000, label: "2,000,000 so'm" },
-  { value: 3000000, label: "3,000,000 so'm" },
+  { value: 0, label: "Free" },
+  { value: 300000, label: "300,000 UZS" },
+  { value: 500000, label: "500,000 UZS" },
+  { value: 800000, label: "800,000 UZS" },
+  { value: 1000000, label: "1,000,000 UZS" },
+  { value: 1500000, label: "1,500,000 UZS" },
+  { value: 2000000, label: "2,000,000 UZS" },
+  { value: 3000000, label: "3,000,000 UZS" },
 ];
 
-// Kurs davomiyligi options
+// Course duration options
 const durationOptions = [
-  { value: "1 hafta", label: "1 hafta" },
-  { value: "2 hafta", label: "2 hafta" },
-  { value: "1 oy", label: "1 oy" },
-  { value: "2 oy", label: "2 oy" },
-  { value: "3 oy", label: "3 oy" },
-  { value: "4 oy", label: "4 oy" },
-  { value: "6 oy", label: "6 oy" },
-  { value: "1 yil", label: "1 yil" },
+  { value: "1 week", label: "1 week" },
+  { value: "2 weeks", label: "2 weeks" },
+  { value: "1 month", label: "1 month" },
+  { value: "2 months", label: "2 months" },
+  { value: "3 months", label: "3 months" },
+  { value: "4 months", label: "4 months" },
+  { value: "6 months", label: "6 months" },
+  { value: "1 year", label: "1 year" },
 ];
 
-// Dars davomiyligi options
+// Lesson duration options
 const lessonDurationOptions = [
-  { value: "30 daqiqa", label: "30 daqiqa" },
-  { value: "45 daqiqa", label: "45 daqiqa" },
-  { value: "1 soat", label: "1 soat" },
-  { value: "1.5 soat", label: "1.5 soat" },
-  { value: "2 soat", label: "2 soat" },
-  { value: "2.5 soat", label: "2.5 soat" },
-  { value: "3 soat", label: "3 soat" },
-  { value: "3.5 soat", label: "3.5 soat" },
+  { value: "30 minutes", label: "30 minutes" },
+  { value: "45 minutes", label: "45 minutes" },
+  { value: "1 hour", label: "1 hour" },
+  { value: "1.5 hours", label: "1.5 hours" },
+  { value: "2 hours", label: "2 hours" },
+  { value: "2.5 hours", label: "2.5 hours" },
+  { value: "3 hours", label: "3 hours" },
+  { value: "3.5 hours", label: "3.5 hours" },
 ];
 
 export const CourseModal: React.FC<CourseModalProps> = ({
@@ -72,7 +72,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
 }) => {
   const [form] = Form.useForm();
 
-  // Modal ochilganda form ma'lumotlarini to'ldirish
+  // Fill form data when modal opens
   useEffect(() => {
     if (open && course) {
       form.setFieldsValue({
@@ -84,7 +84,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
         lesson_duration: course.lesson_duration || "",
       });
     } else if (open && !course) {
-      // Yangi kurs uchun default qiymatlar
+      // Default values for new course
       form.setFieldsValue({
         title: "",
         description: "",
@@ -112,15 +112,14 @@ export const CourseModal: React.FC<CourseModalProps> = ({
 
   return (
     <Modal
-      title={course ? "Kursni tahrirlash" : "Yangi kurs yaratish"}
+      title={course ? "Edit Course" : "Create New Course"}
       open={open}
       onCancel={handleCancel}
       onOk={handleSubmit}
       confirmLoading={loading}
-      okText={course ? "Saqlash" : "Yaratish"}
-      cancelText="Bekor qilish"
-      width={600}
-    >
+      okText={course ? "Save" : "Create"}
+      cancelText="Cancel"
+      width={600}>
       <Form
         form={form}
         layout="vertical"
@@ -131,22 +130,19 @@ export const CourseModal: React.FC<CourseModalProps> = ({
           duration: "",
           lessons_in_a_week: 1,
           lesson_duration: "",
-        }}
-      >
+        }}>
         <Form.Item
           name="title"
-          label="Kurs nomi"
-          rules={[
-            { required: true, message: "Kurs nomi tanlanishi shart!" },
-          ]}
-        >
+          label="Course Name"
+          rules={[{ required: true, message: "Course name is required!" }]}>
           <Select
-            placeholder="Kurs nomini tanlang"
+            placeholder="Select course name"
             showSearch
             filterOption={(input, option) =>
-              (option?.children as unknown as string)?.toLowerCase().indexOf(input.toLowerCase()) >= 0
-            }
-          >
+              (option?.children as unknown as string)
+                ?.toLowerCase()
+                .indexOf(input.toLowerCase()) >= 0
+            }>
             {courseNameOptions.map((option) => (
               <Option key={option.value} value={option.value}>
                 {option.label}
@@ -156,27 +152,10 @@ export const CourseModal: React.FC<CourseModalProps> = ({
         </Form.Item>
 
         <Form.Item
-          name="description"
-          label="Tavsif"
-          rules={[
-            { required: true, message: "Tavsif kiritilishi shart!" },
-            { min: 10, message: "Tavsif kamida 10 ta belgidan iborat bo'lishi kerak!" },
-          ]}
-        >
-          <TextArea 
-            rows={4} 
-            placeholder="Kurs haqida batafsil ma'lumot kiriting"
-          />
-        </Form.Item>
-
-        <Form.Item
           name="price"
-          label="Narx"
-          rules={[
-            { required: true, message: "Narx tanlanishi shart!" },
-          ]}
-        >
-          <Select placeholder="Kurs narxini tanlang">
+          label="Price"
+          rules={[{ required: true, message: "Price is required!" }]}>
+          <Select placeholder="Select course price">
             {priceOptions.map((option) => (
               <Option key={option.value} value={option.value}>
                 {option.label}
@@ -187,12 +166,9 @@ export const CourseModal: React.FC<CourseModalProps> = ({
 
         <Form.Item
           name="duration"
-          label="Kurs davomiyligi"
-          rules={[
-            { required: true, message: "Davomiylik tanlanishi shart!" },
-          ]}
-        >
-          <Select placeholder="Kurs davomiyligini tanlang">
+          label="Course Duration"
+          rules={[{ required: true, message: "Duration is required!" }]}>
+          <Select placeholder="Select course duration">
             {durationOptions.map((option) => (
               <Option key={option.value} value={option.value}>
                 {option.label}
@@ -203,15 +179,21 @@ export const CourseModal: React.FC<CourseModalProps> = ({
 
         <Form.Item
           name="lessons_in_a_week"
-          label="Haftada darslar soni"
+          label="Lessons per Week"
           rules={[
-            { required: true, message: "Haftada darslar soni kiritilishi shart!" },
-            { type: "number", min: 1, message: "Kamida 1 ta dars bo'lishi kerak!" },
-          ]}
-        >
+            {
+              required: true,
+              message: "Number of lessons per week is required!",
+            },
+            {
+              type: "number",
+              min: 1,
+              message: "At least 1 lesson is required!",
+            },
+          ]}>
           <InputNumber
             style={{ width: "100%" }}
-            placeholder="Haftada nechta dars"
+            placeholder="Number of lessons per week"
             min={1}
             max={7}
             precision={0}
@@ -220,18 +202,31 @@ export const CourseModal: React.FC<CourseModalProps> = ({
 
         <Form.Item
           name="lesson_duration"
-          label="Har bir dars davomiyligi"
-          rules={[
-            { required: true, message: "Dars davomiyligi tanlanishi shart!" },
-          ]}
-        >
-          <Select placeholder="Dars davomiyligini tanlang">
+          label="Duration per Lesson"
+          rules={[{ required: true, message: "Lesson duration is required!" }]}>
+          <Select placeholder="Select lesson duration">
             {lessonDurationOptions.map((option) => (
               <Option key={option.value} value={option.value}>
                 {option.label}
               </Option>
             ))}
           </Select>
+        </Form.Item>
+
+        <Form.Item
+          name="description"
+          label="Description"
+          rules={[
+            { required: true, message: "Description is required!" },
+            {
+              min: 10,
+              message: "Description must be at least 10 characters long!",
+            },
+          ]}>
+          <TextArea
+            rows={4}
+            placeholder="Enter detailed information about the course"
+          />
         </Form.Item>
       </Form>
     </Modal>

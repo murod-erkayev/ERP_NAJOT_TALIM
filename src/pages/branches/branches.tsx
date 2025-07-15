@@ -11,9 +11,9 @@ import {
   message,
 } from "antd";
 import { SearchOutlined, ClearOutlined, PlusOutlined } from "@ant-design/icons";
-import { useBranch } from "../../hooks"; // Bu sizning custom hook'ingiz
-import type { BranchesTypes } from "../../types"; // Bu sizning type definitsiyangiz
-import { BranchModal } from "./brancheMadol"; // Modal komponentini import qilish
+import { useBranch } from "../../hooks"; // Your custom hook
+import type { BranchesTypes } from "../../types"; // Your type definition
+import { BranchModal } from "./brancheMadol"; // Import modal component
 
 const { Search } = Input;
 
@@ -22,13 +22,13 @@ export const Branches = () => {
   const [filteredBranches, setFilteredBranches] = useState<BranchesTypes[]>([]);
   const [searchText, setSearchText] = useState("");
 
-  // Modal holatlari
+  // Modal states
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<BranchesTypes | null>(
     null
   );
 
-  // Hooks - sizning hook strukturangizga mos
+  // Hooks - matching your hook structure
   const {
     data: branchData,
     useBranchCreate,
@@ -41,12 +41,12 @@ export const Branches = () => {
   const updateMutation = useBranchUpdate();
   const deleteMutation = useBranchDelete();
 
-  // useEffect orqali branchData kelyapti va branches holatiga o'rnatilyapti
+  // Setting branchData to branches state via useEffect
   useEffect(() => {
     console.log("Branch data received:", branchData);
 
     if (branchData && branchData.data) {
-      // Backend dan data.data.branch formatida kelishi mumkin
+      // Backend might return data in data.data.branch format
       const branchesData =
         branchData.data.data?.branch ||
         branchData.data.branch ||
@@ -67,7 +67,7 @@ export const Branches = () => {
     }
   }, [branchData]);
 
-  // Qidiruv funksionaliteti
+  // Search functionality
   useEffect(() => {
     let filtered = [...branches];
     if (searchText) {
@@ -81,50 +81,50 @@ export const Branches = () => {
     setFilteredBranches(filtered);
   }, [branches, searchText]);
 
-  // Filialni o'chirish funksiyasi
+  // Delete branch function
   const handleDelete = (branch: any) => {
     deleteMutation.mutate(branch.id, {
       onSuccess: () => {
-        message.success("Filial muvaffaqiyatli o'chirildi");
+        message.success("Branch deleted successfully");
         setBranches((prev) => prev.filter((b: any) => b.id !== branch.id));
       },
       onError: (error) => {
-        message.error("Filialni o'chirishda xatolik yuz berdi");
+        message.error("Error occurred while deleting branch");
         console.error("Delete error:", error);
       },
     });
   };
 
-  // Yangi filial yaratish uchun modal ochish
+  // Open modal for creating new branch
   const handleCreate = () => {
     setSelectedBranch(null);
     setModalOpen(true);
   };
 
-  // Filialni tahrirlash uchun modal ochish
+  // Open modal for editing branch
   const handleUpdate = (branch: any) => {
     setSelectedBranch(branch);
     setModalOpen(true);
   };
 
-  // Modal yopish
+  // Close modal
   const handleModalCancel = () => {
     setModalOpen(false);
     setSelectedBranch(null);
   };
 
-  // Modal submit (yaratish yoki tahrirlash)
+  // Modal submit (create or edit)
   const handleModalSubmit = (values: any) => {
     if (selectedBranch) {
-      // Filialni tahrirlash
+      // Edit branch
       updateMutation.mutate(
         { id: (selectedBranch as any).id, data: values },
         {
           onSuccess: (response) => {
-            message.success("Filial muvaffaqiyatli tahrirlandi");
+            message.success("Branch updated successfully");
             console.log("Update response:", response);
 
-            // Backend'dan kelayotgan response formatiga qarab
+            // Based on backend response format
             const updatedBranch =
               response?.data?.data?.branch ||
               response?.data?.branch ||
@@ -142,19 +142,19 @@ export const Branches = () => {
             setSelectedBranch(null);
           },
           onError: (error) => {
-            message.error("Filialni tahrirlashda xatolik yuz berdi");
+            message.error("Error occurred while updating branch");
             console.error("Update error:", error);
           },
         }
       );
     } else {
-      // Yangi filial yaratish
+      // Create new branch
       createMutation.mutate(values, {
         onSuccess: (response) => {
-          message.success("Yangi filial muvaffaqiyatli yaratildi");
+          message.success("New branch created successfully");
           console.log("Create response:", response);
 
-          // Backend'dan kelayotgan response formatiga qarab
+          // Based on backend response format
           const newBranch = response?.data?.data?.branch ||
             response?.data?.branch ||
             response?.data || { ...values, id: Date.now() };
@@ -163,19 +163,19 @@ export const Branches = () => {
           setModalOpen(false);
         },
         onError: (error) => {
-          message.error("Filial yaratishda xatolik yuz berdi");
+          message.error("Error occurred while creating branch");
           console.error("Create error:", error);
         },
       });
     }
   };
 
-  // Filtrlarni tozalash funksiyasi
+  // Clear filters function
   const clearFilters = () => {
     setSearchText("");
   };
 
-  // Jadval ustunlari konfiguratsiyasi
+  // Table columns configuration
   const columns = [
     {
       title: "ID",
@@ -183,36 +183,36 @@ export const Branches = () => {
       width: 60,
     },
     {
-      title: "Filial nomi",
+      title: "Branch Name",
       dataIndex: "name",
       key: "name",
       sorter: (a: any, b: any) => (a.name || "").localeCompare(b.name || ""),
     },
     {
-      title: "Manzil",
+      title: "Address",
       dataIndex: "address",
       key: "address",
       ellipsis: true,
       width: 300,
     },
     {
-      title: "Telefon raqami",
+      title: "Phone Number",
       dataIndex: "call_number",
       key: "call_number",
-      render: (phone: string) => phone || "Noma'lum",
+      render: (phone: string) => phone || "Unknown",
     },
     {
-      title: "Yaratilgan sana",
+      title: "Created Date",
       dataIndex: "created_at",
       key: "created_at",
       render: (date: string) =>
-        date ? new Date(date).toLocaleDateString("uz-UZ") : "Noma'lum",
+        date ? new Date(date).toLocaleDateString("en-US") : "Unknown",
       sorter: (a: any, b: any) =>
         new Date(a.created_at || "").getTime() -
         new Date(b.created_at || "").getTime(),
     },
     {
-      title: "Amallar",
+      title: "Actions",
       key: "actions",
       width: 120,
       render: (_: any, branch: any) => (
@@ -221,20 +221,20 @@ export const Branches = () => {
             type="link"
             size="small"
             onClick={() => handleUpdate(branch)}
-            title="Tahrirlash">
+            title="Edit">
             ✏️
           </Button>
           <Popconfirm
-            title="Filialni o'chirish"
-            description="Rostdan ham bu filialni o'chirmoqchimisiz?"
+            title="Delete Branch"
+            description="Are you sure you want to delete this branch?"
             onConfirm={() => handleDelete(branch)}
-            okText="Ha"
-            cancelText="Yo'q">
+            okText="Yes"
+            cancelText="No">
             <Button
               type="link"
               danger
               size="small"
-              title="O'chirish"
+              title="Delete"
               loading={deleteMutation.isPending}>
               🗑️
             </Button>
@@ -244,28 +244,28 @@ export const Branches = () => {
     },
   ];
 
-  // Loading va error holatlari - hook'dan keladigan ma'lumotlarga qarab
-  const isLoading = !branchData; // Agar data yo'q bo'lsa, loading deb hisoblaymiz
-  const error = null; // Hook'ingizda error yo'q, shuning uchun null
+  // Loading and error states - based on data from hook
+  const isLoading = !branchData; // If no data, consider it loading
+  const error = null; // No error in your hook, so null
 
   if (isLoading) {
     return (
       <div style={{ padding: 20, textAlign: "center" }}>
-        <h3>Filiallar yuklanmoqda...</h3>
+        <h3>Loading branches...</h3>
       </div>
     );
   }
 
   return (
     <div style={{ padding: 20 }}>
-      <h1 style={{ marginBottom: 20 }}>Filiallar</h1>
+      <h1 style={{ marginBottom: 20 }}>Branches</h1>
 
-      {/* Filtrlar va Yangi filial yaratish tugmasi */}
+      {/* Filters and Create new branch button */}
       <Card style={{ marginBottom: 16 }}>
         <Row gutter={[16, 16]} align="middle">
           <Col xs={24} sm={12} md={8}>
             <Search
-              placeholder="Filial nomi, manzil yoki telefon..."
+              placeholder="Branch name, address or phone..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               prefix={<SearchOutlined />}
@@ -279,20 +279,20 @@ export const Branches = () => {
                 icon={<ClearOutlined />}
                 onClick={clearFilters}
                 disabled={!searchText}>
-                Tozalash
+                Clear
               </Button>
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
                 onClick={handleCreate}>
-                Yangi filial
+                New Branch
               </Button>
             </Space>
           </Col>
         </Row>
       </Card>
 
-      {/* Jadval */}
+      {/* Table */}
       <Card>
         <Table
           dataSource={filteredBranches}
@@ -303,14 +303,14 @@ export const Branches = () => {
             showSizeChanger: true,
             showQuickJumper: true,
             showTotal: (total, range) =>
-              `${range[0]}-${range[1]} / ${total} ta filial`,
+              `${range[0]}-${range[1]} of ${total} branches`,
             position: ["bottomCenter"],
           }}
           locale={{
             emptyText:
               filteredBranches.length === 0 && branches.length > 0
-                ? "Hech qanday filial topilmadi"
-                : "Filiallar mavjud emas",
+                ? "No branches found"
+                : "No branches available",
           }}
           scroll={{ x: 800 }}
         />

@@ -4,3 +4,4 @@ export * from "./useCourse"
 export * from "./useStudent"
 export * from "./useBranches";
 export * from "./useTeachers";
+export * from "./useGeneral";

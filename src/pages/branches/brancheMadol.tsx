@@ -1,7 +1,7 @@
 import { Modal, Form, Input, message } from "antd";
 import { useEffect } from "react";
 import type { BranchesTypes } from "../../types";
-
+import { MaskedInput } from "antd-mask-input";
 interface BranchModalProps {
   open: boolean;
   onCancel: () => void;
@@ -19,7 +19,7 @@ export const BranchModal: React.FC<BranchModalProps> = ({
 }) => {
   const [form] = Form.useForm();
 
-  // Modal ochilganda form ma'lumotlarini to'ldirish
+  // Fill form data when modal opens
   useEffect(() => {
     if (open && branch) {
       form.setFieldsValue({
@@ -28,7 +28,7 @@ export const BranchModal: React.FC<BranchModalProps> = ({
         call_number: branch.call_number || "",
       });
     } else if (open && !branch) {
-      // Yangi filial uchun default qiymatlar
+      // Default values for new branch
       form.setFieldsValue({
         name: "",
         address: "",
@@ -53,13 +53,13 @@ export const BranchModal: React.FC<BranchModalProps> = ({
 
   return (
     <Modal
-      title={branch ? "Filialni tahrirlash" : "Yangi filial yaratish"}
+      title={branch ? "Edit Branch" : "Create New Branch"}
       open={open}
       onCancel={handleCancel}
       onOk={handleSubmit}
       confirmLoading={loading}
-      okText={branch ? "Saqlash" : "Yaratish"}
-      cancelText="Bekor qilish"
+      okText={branch ? "Save" : "Create"}
+      cancelText="Cancel"
       width={500}>
       <Form
         form={form}
@@ -71,47 +71,48 @@ export const BranchModal: React.FC<BranchModalProps> = ({
         }}>
         <Form.Item
           name="name"
-          label="Filial nomi"
+          label="Branch Name"
           rules={[
-            { required: true, message: "Filial nomi kiritilishi shart!" },
+            { required: true, message: "Branch name is required!" },
             {
               min: 3,
-              message:
-                "Filial nomi kamida 3 ta belgidan iborat bo'lishi kerak!",
+              message: "Branch name must be at least 3 characters long!",
             },
           ]}>
-          <Input placeholder="Filial nomini kiriting" />
-        </Form.Item>
-
-        <Form.Item
-          name="address"
-          label="Manzil"
-          rules={[
-            { required: true, message: "Manzil kiritilishi shart!" },
-            {
-              min: 10,
-              message: "Manzil kamida 10 ta belgidan iborat bo'lishi kerak!",
-            },
-          ]}>
-          <Input.TextArea rows={3} placeholder="To'liq manzilni kiriting" />
+          <Input placeholder="Enter branch name" />
         </Form.Item>
 
         <Form.Item
           name="call_number"
-          label="Telefon raqami"
+          label="Phone Number"
           rules={[
-            { required: true, message: "Telefon raqami kiritilishi shart!" },
+            { required: true, message: "Phone number is required!" },
             {
               pattern: /^[\+]?[0-9\-\(\)\s]+$/,
-              message: "To'g'ri telefon raqami formatini kiriting!",
+              message: "Please enter a valid phone number format!",
             },
             {
               min: 9,
-              message:
-                "Telefon raqami kamida 9 ta raqamdan iborat bo'lishi kerak!",
+              message: "Phone number must be at least 9 digits long!",
             },
           ]}>
-          <Input placeholder="+998 90 123 45 67" maxLength={20} />
+          <MaskedInput
+            mask="+998 00 000 00 00"
+            placeholder="Enter phone number"
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="address"
+          label="Address"
+          rules={[
+            { required: true, message: "Address is required!" },
+            {
+              min: 10,
+              message: "Address must be at least 10 characters long!",
+            },
+          ]}>
+          <Input.TextArea rows={3} placeholder="Enter full address" />
         </Form.Item>
       </Form>
     </Modal>
